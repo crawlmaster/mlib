@@ -120,7 +120,7 @@ mlib_status_t mlib_sll_remove_head(mlib_sll_t *list)
 	if (list->tail == head)
 		list->tail = list->sentinel;
 
-	if (list->free_fn)
+	if (list->free_fn && head->data)
 		list->free_fn(head->data);
 	free(head);
 	--list->size;
@@ -138,7 +138,7 @@ mlib_status_t mlib_sll_remove_tail(mlib_sll_t *list)
 	while (iter->next != list->tail)
 		iter = iter->next;
 
-	if (list->free_fn)
+	if (list->free_fn && list->tail->data)
 		list->free_fn(list->tail->data);
 	free(list->tail);
 
@@ -168,7 +168,7 @@ mlib_status_t mlib_sll_remove_at(mlib_sll_t *list, size_t index)
 	mlib_sll_node_t *remove = iter->next;
 	iter->next = remove->next;
 
-	if (list->free_fn)
+	if (list->free_fn && remove->data)
 		list->free_fn(remove->data);
 	free(remove);
 	--list->size;

@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +25,14 @@ typedef void (*mlib_free_fn)(void *data);
 typedef int (*mlib_compar_fn)(const void *a, const void *b);
 
 // Generic callback function used in foreach
-typedef void (*mlib_callback_fn)(void **data, void *user_data);
+typedef void (*mlib_callback_fn)(void *data, void *user_data);
+
+// Generic indirect freeing function for heap addresses stored in memory
+static inline void mlib_free_indirect(void *elem)
+{
+	if (elem && *(void **)elem)
+		free(*(void **)elem);
+}
 
 #ifdef __cplusplus
 }
