@@ -4,7 +4,7 @@ A modular, generic, and memory-safe data structures library written in C11.
 
 ## Modules Roadmap
 - [x] Singly Linked Lists
-- [ ] Dynamic Vector
+- [x] Dynamic Vector
 - [ ] Generic Stack / Queue
 - [ ] Binary Heap & Priority Queue
 - [ ] Binary Search Tree & AVL Tree
@@ -13,6 +13,7 @@ A modular, generic, and memory-safe data structures library written in C11.
 - [ ] Graphs
 - [ ] Graph Algorithms - Shortest Paths, MST, etc.
 
+* A data structure is considered implemented when all the mandatory functions for that structure have been implemented. Additional useful funcitons can be implemented later in development.
 ## Build & Test
 
 ```bash

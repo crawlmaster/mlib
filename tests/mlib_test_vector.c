@@ -19,7 +19,7 @@ static char *test_strdup(const char *src)
 	if (!src)
 		return NULL;
 	size_t len = strlen(src) + 1;
-	char *dst = malloc(len);
+	char  *dst = malloc(len);
 	if (dst)
 		memcpy(dst, src, len);
 	return dst;
@@ -49,6 +49,10 @@ typedef struct {
 	int   id;
 	char *tag;
 } test_item_t;
+
+typedef struct {
+	unsigned char data[300];
+} large_struct_t;
 
 static void test_item_cleanup(void *elem)
 {
@@ -582,6 +586,173 @@ void test_clear_and_destroy(int *passed_tests, int *total_tests)
 	print_test_result(destroy_ok, passed_tests, total_tests);
 }
 
+void test_sort(int *passed_tests, int *total_tests)
+{
+	puts("Testing MLIB Vector Sort:");
+
+	mlib_vector_t *vect = create_test_vector(passed_tests, total_tests,
+						 sizeof(int), 0, NULL);
+	if (!vect)
+		return;
+
+	printf("%*s", STR_PAD, "Testing sort on NULL vector or callback");
+	print_test_result(
+		mlib_vector_sort(NULL, cmp_int) == MLIB_ERR_NULL_PTR &&
+			mlib_vector_sort(vect, NULL) == MLIB_ERR_NULL_PTR,
+		passed_tests, total_tests);
+
+	printf("%*s", STR_PAD, "Testing sort on empty vector");
+	print_test_result(mlib_vector_sort(vect, cmp_int) == MLIB_SUCCESS,
+			  passed_tests, total_tests);
+
+	int single = 42;
+	mlib_vector_push_back(vect, &single);
+	printf("%*s", STR_PAD, "Testing sort on 1-element vector");
+	print_test_result(mlib_vector_sort(vect, cmp_int) == MLIB_SUCCESS,
+			  passed_tests, total_tests);
+
+	int    raw_vals[] = { 45, -3, 100, 0, 12, -3, 8 };
+	size_t count = sizeof(raw_vals) / sizeof(raw_vals[0]);
+	mlib_vector_clear(vect);
+	for (size_t i = 0; i < count; ++i)
+		mlib_vector_push_back(vect, &raw_vals[i]);
+
+	printf("%*s", STR_PAD, "Testing full vector sort");
+	bool sort_ok = (mlib_vector_sort(vect, cmp_int) == MLIB_SUCCESS);
+	int  expected[] = { -3, -3, 0, 8, 12, 45, 100 };
+	for (size_t i = 0; i < count; ++i) {
+		int *val = (int *)mlib_vector_get(vect, i);
+		if (!val || *val != expected[i]) {
+			sort_ok = false;
+			break;
+		}
+	}
+	print_test_result(sort_ok, passed_tests, total_tests);
+
+	mlib_vector_destroy(&vect);
+}
+
+void test_sort_range(int *passed_tests, int *total_tests)
+{
+	puts("Testing MLIB Vector Sort Range:");
+
+	mlib_vector_t *vect = create_test_vector(passed_tests, total_tests,
+						 sizeof(int), 0, NULL);
+	if (!vect)
+		return;
+
+	int    raw_vals[] = { 50, 40, 30, 20, 10, 0 };
+	size_t count = sizeof(raw_vals) / sizeof(raw_vals[0]);
+	for (size_t i = 0; i < count; ++i)
+		mlib_vector_push_back(vect, &raw_vals[i]);
+
+	printf("%*s", STR_PAD, "Testing sort_range out of bounds");
+	print_test_result(mlib_vector_sort_range(vect, 4, 3, cmp_int) ==
+				  MLIB_ERR_OUT_OF_BOUNDS,
+			  passed_tests, total_tests);
+
+	printf("%*s", STR_PAD, "Testing sort_range with count < 2 (no-op)");
+	print_test_result(mlib_vector_sort_range(vect, 2, 1, cmp_int) ==
+				  MLIB_SUCCESS,
+			  passed_tests, total_tests);
+
+	printf("%*s", STR_PAD, "Testing sort_range on sub-interval [1, 5)");
+	bool range_ok =
+		(mlib_vector_sort_range(vect, 1, 4, cmp_int) == MLIB_SUCCESS);
+	int expected[] = { 50, 10, 20, 30, 40, 0 };
+	for (size_t i = 0; i < count; ++i) {
+		int *val = (int *)mlib_vector_get(vect, i);
+		if (!val || *val != expected[i]) {
+			range_ok = false;
+			break;
+		}
+	}
+	print_test_result(range_ok, passed_tests, total_tests);
+
+	mlib_vector_destroy(&vect);
+}
+
+void test_reverse(int *passed_tests, int *total_tests)
+{
+	puts("Testing MLIB Vector Reverse:");
+
+	printf("%*s", STR_PAD, "Testing reverse on NULL vector");
+	print_test_result(mlib_vector_reverse(NULL) == MLIB_ERR_NULL_PTR,
+			  passed_tests, total_tests);
+
+	mlib_vector_t *vect = create_test_vector(passed_tests, total_tests,
+						 sizeof(int), 0, NULL);
+	if (!vect)
+		return;
+
+	printf("%*s", STR_PAD, "Testing reverse on empty vector");
+	print_test_result(mlib_vector_reverse(vect) == MLIB_SUCCESS,
+			  passed_tests, total_tests);
+
+	int single = 11;
+	mlib_vector_push_back(vect, &single);
+	printf("%*s", STR_PAD, "Testing reverse on single-element vector");
+	print_test_result(mlib_vector_reverse(vect) == MLIB_SUCCESS &&
+				  *(int *)mlib_vector_get(vect, 0) == 11,
+			  passed_tests, total_tests);
+
+	int vals_odd[] = { 1, 2, 3, 4, 5 };
+	mlib_vector_clear(vect);
+	for (size_t i = 0; i < 5; ++i)
+		mlib_vector_push_back(vect, &vals_odd[i]);
+
+	printf("%*s", STR_PAD, "Testing reverse on odd length (stack buffer)");
+	bool odd_ok = (mlib_vector_reverse(vect) == MLIB_SUCCESS);
+	for (size_t i = 0; i < 5; ++i) {
+		int *val = (int *)mlib_vector_get(vect, i);
+		if (!val || *val != (int)(5 - i)) {
+			odd_ok = false;
+			break;
+		}
+	}
+	print_test_result(odd_ok, passed_tests, total_tests);
+
+	int vals_even[] = { 10, 20, 30, 40 };
+	mlib_vector_clear(vect);
+	for (size_t i = 0; i < 4; ++i)
+		mlib_vector_push_back(vect, &vals_even[i]);
+
+	printf("%*s", STR_PAD, "Testing reverse on even length");
+	bool even_ok = (mlib_vector_reverse(vect) == MLIB_SUCCESS);
+	int  expected_even[] = { 40, 30, 20, 10 };
+	for (size_t i = 0; i < 4; ++i) {
+		int *val = (int *)mlib_vector_get(vect, i);
+		if (!val || *val != expected_even[i]) {
+			even_ok = false;
+			break;
+		}
+	}
+	print_test_result(even_ok, passed_tests, total_tests);
+	mlib_vector_destroy(&vect);
+
+	/* Test large element swapping (elem_size > 256 bytes forces heap malloc path) */
+	mlib_vector_t *v_large = create_test_vector(
+		passed_tests, total_tests, sizeof(large_struct_t), 0, NULL);
+	if (!v_large)
+		return;
+
+	large_struct_t p1, p2;
+	memset(p1.data, 0xAA, sizeof(p1.data));
+	memset(p2.data, 0xBB, sizeof(p2.data));
+	mlib_vector_push_back(v_large, &p1);
+	mlib_vector_push_back(v_large, &p2);
+
+	printf("%*s", STR_PAD, "Testing reverse on large elements (heap path)");
+	bool large_ok = (mlib_vector_reverse(v_large) == MLIB_SUCCESS);
+	large_struct_t *res0 = (large_struct_t *)mlib_vector_get(v_large, 0);
+	large_struct_t *res1 = (large_struct_t *)mlib_vector_get(v_large, 1);
+	if (!res0 || res0->data[0] != 0xBB || !res1 || res1->data[0] != 0xAA)
+		large_ok = false;
+
+	print_test_result(large_ok, passed_tests, total_tests);
+	mlib_vector_destroy(&v_large);
+}
+
 int main(void)
 {
 	int passed_tests = 0, total_tests = 0;
@@ -598,6 +769,9 @@ int main(void)
 	test_foreach(&passed_tests, &total_tests);
 	test_destructor_semantics(&passed_tests, &total_tests);
 	test_clear_and_destroy(&passed_tests, &total_tests);
+	test_sort(&passed_tests, &total_tests);
+	test_sort_range(&passed_tests, &total_tests);
+	test_reverse(&passed_tests, &total_tests);
 
 	printf("\n==================================================\n");
 	printf("SUMMARY: %d / %d tests passed\n", passed_tests, total_tests);

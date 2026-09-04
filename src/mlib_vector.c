@@ -424,6 +424,65 @@ void mlib_vector_destroy(mlib_vector_t **vect)
 	*vect = NULL;
 }
 
+mlib_status_t mlib_vector_sort_range(mlib_vector_t *vect, size_t start,
+				     size_t n, mlib_compar_fn comp)
+{
+	if (!vect || !comp)
+		return MLIB_ERR_NULL_PTR;
+
+	if (n > vect->size || start > vect->size - n)
+		return MLIB_ERR_OUT_OF_BOUNDS;
+
+	if (n < 2)
+		return MLIB_SUCCESS;
+
+	void *data_start = (char *)vect->data + (start * vect->elem_size);
+	qsort(data_start, n, vect->elem_size,
+	      (int (*)(const void *, const void *))comp);
+
+	return MLIB_SUCCESS;
+}
+
+mlib_status_t mlib_vector_sort(mlib_vector_t *vect, mlib_compar_fn comp)
+{
+	return mlib_vector_sort_range(vect, 0, vect ? vect->size : 0, comp);
+}
+
+mlib_status_t mlib_vector_reverse(mlib_vector_t *vect)
+{
+	if (!vect)
+		return MLIB_ERR_NULL_PTR;
+	if (vect->size < 2)
+		return MLIB_SUCCESS;
+
+	char  stack_buf[256];
+	char *aux_buf = stack_buf;
+
+	if (vect->elem_size > sizeof(stack_buf)) {
+		aux_buf = malloc(vect->elem_size);
+		if (!aux_buf)
+			return MLIB_ERR_ALLOC;
+	}
+
+	char *left = (char *)vect->data;
+	char *right = (char *)vect->data + ((vect->size - 1) * vect->elem_size);
+	size_t elem_size = vect->elem_size;
+
+	while (left < right) {
+		memcpy(aux_buf, left, elem_size);
+		memcpy(left, right, elem_size);
+		memcpy(right, aux_buf, elem_size);
+
+		left += elem_size;
+		right -= elem_size;
+	}
+
+	if (aux_buf != stack_buf)
+		free(aux_buf);
+
+	return MLIB_SUCCESS;
+}
+
 #ifdef __cplusplus
 }
 #endif

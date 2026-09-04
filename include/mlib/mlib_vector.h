@@ -43,6 +43,15 @@ mlib_status_t mlib_vector_foreach(mlib_vector_t *vec, mlib_callback_fn cb,
 
 void mlib_vector_destroy(mlib_vector_t **vect);
 
+/* Some other useful functions - work in progress */
+mlib_status_t mlib_vector_sort_range(mlib_vector_t *vect, size_t start,
+				     size_t n, mlib_compar_fn comp);
+mlib_status_t mlib_vector_sort(mlib_vector_t *vect, mlib_compar_fn comp);
+
+mlib_status_t mlib_vector_reverse(mlib_vector_t *vect);
+
+mlib_status_t mlib_vector_swap_remove(mlib_vector_t *vect, size_t index);
+
 #ifdef __cplusplus
 }
 #endif
