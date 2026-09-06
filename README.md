@@ -9,6 +9,7 @@ A modular, generic, and memory-safe data structures library written in C11.
 - [ ] Binary Heap & Priority Queue
 - [ ] Binary Search Tree & AVL Tree
 - [ ] Red-Black Tree
+- [ ] Trie & Radix-Trie
 - [ ] Fibonacci Heap
 - [ ] Graphs
 - [ ] Graph Algorithms - Shortest Paths, MST, etc.

@@ -30,7 +30,7 @@ int main(void)
 	mlib_sll_t *list = mlib_sll_create(free);
 	if (!list)
 		return 1;
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 5000; ++i) {
 		char *rand_chars = random_chars(4, rfp);
 		printf("inserting %s\n", rand_chars);
 		(void)mlib_sll_insert_at(list, 1, rand_chars);
