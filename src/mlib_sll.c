@@ -89,7 +89,7 @@ mlib_status_t mlib_sll_insert_at(mlib_sll_t *list, size_t index, void *data)
 
 	if (index == 0)
 		return mlib_sll_insert_head(list, data);
-	if (index >= list->size)
+	if (unlikely(index >= list->size))
 		return mlib_sll_insert_tail(list, data);
 
 	mlib_sll_node_t *new = malloc(sizeof(*new));
@@ -111,7 +111,7 @@ mlib_status_t mlib_sll_remove_head(mlib_sll_t *list)
 {
 	if (unlikely(!list))
 		return MLIB_ERR_NULL_PTR;
-	if (list->size == 0)
+	if (unlikely(list->size == 0))
 		return MLIB_ERR_EMPTY;
 
 	mlib_sll_node_t *head = list->sentinel->next;
@@ -131,7 +131,7 @@ mlib_status_t mlib_sll_remove_tail(mlib_sll_t *list)
 {
 	if (unlikely(!list))
 		return MLIB_ERR_NULL_PTR;
-	if (list->size == 0)
+	if (unlikely(list->size == 0))
 		return MLIB_ERR_EMPTY;
 
 	mlib_sll_node_t *iter = list->sentinel;
@@ -152,9 +152,9 @@ mlib_status_t mlib_sll_remove_at(mlib_sll_t *list, size_t index)
 {
 	if (unlikely(!list))
 		return MLIB_ERR_NULL_PTR;
-	if (list->size == 0)
+	if (unlikely(list->size == 0))
 		return MLIB_ERR_EMPTY;
-	if (index >= list->size)
+	if (unlikely(index >= list->size))
 		return MLIB_ERR_OUT_OF_BOUNDS;
 	if (index == 0)
 		return mlib_sll_remove_head(list);
@@ -219,7 +219,7 @@ mlib_sll_iter_t *mlib_sll_head(const mlib_sll_t *list)
 		return NULL;
 
 	mlib_sll_iter_t *iter = malloc(sizeof(*iter));
-	if (!iter)
+	if (unlikely(!iter))
 		return NULL;
 
 	iter->it = list->sentinel->next;
@@ -229,11 +229,11 @@ mlib_sll_iter_t *mlib_sll_head(const mlib_sll_t *list)
 
 mlib_sll_iter_t *mlib_sll_tail(const mlib_sll_t *list)
 {
-	if (!list)
+	if (unlikely(!list))
 		return NULL;
 
 	mlib_sll_iter_t *iter = malloc(sizeof(*iter));
-	if (!iter)
+	if (unlikely(!iter))
 		return NULL;
 
 	iter->it = (list->tail == list->sentinel) ? NULL : list->tail;
@@ -243,7 +243,7 @@ mlib_sll_iter_t *mlib_sll_tail(const mlib_sll_t *list)
 
 mlib_sll_iter_t *mlib_sll_at(const mlib_sll_t *list, size_t index)
 {
-	if (!list || index >= list->size)
+	if (unlikely(!list || index >= list->size))
 		return NULL;
 
 	if (index == 0)
@@ -252,7 +252,7 @@ mlib_sll_iter_t *mlib_sll_at(const mlib_sll_t *list, size_t index)
 		return mlib_sll_tail(list);
 
 	mlib_sll_iter_t *iter = malloc(sizeof(*iter));
-	if (!iter)
+	if (unlikely(!iter))
 		return NULL;
 
 	mlib_sll_node_t *iter_node = list->sentinel->next;
@@ -266,7 +266,7 @@ mlib_sll_iter_t *mlib_sll_at(const mlib_sll_t *list, size_t index)
 
 void *mlib_sll_iter_data(const mlib_sll_iter_t *iter)
 {
-	if (!iter || !iter->list || !iter->it)
+	if (unlikely(!iter || !iter->list || !iter->it))
 		return NULL;
 
 	return iter->it->data;
@@ -274,7 +274,7 @@ void *mlib_sll_iter_data(const mlib_sll_iter_t *iter)
 
 void mlib_sll_iter_destroy(mlib_sll_iter_t **iter)
 {
-	if (!iter || !*iter)
+	if (unlikely(!iter || !*iter))
 		return;
 
 	free(*iter);
@@ -320,7 +320,7 @@ void mlib_sll_clear(mlib_sll_t *list)
 
 void mlib_sll_destroy(mlib_sll_t **list)
 {
-	if (!list || !*list)
+	if (unlikely(!list || !*list))
 		return;
 
 	mlib_sll_clear(*list);

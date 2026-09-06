@@ -93,7 +93,7 @@ mlib_status_t mlib_vector_push_back(mlib_vector_t *vect, const void *elem)
 
 		mlib_status_t status = mlib_vector_check_overflow(
 			vect->capacity, vect->elem_size, &new_cap);
-		if (status != MLIB_SUCCESS)
+		if (unlikely(status != MLIB_SUCCESS))
 			return status;
 
 		void *aux_data = realloc(vect->data, new_cap * vect->elem_size);
@@ -173,7 +173,7 @@ mlib_status_t mlib_vector_pop_back(mlib_vector_t *vect)
 {
 	if (unlikely(!vect))
 		return MLIB_ERR_NULL_PTR;
-	if (vect->size == 0)
+	if (unlikely(vect->size == 0))
 		return MLIB_ERR_EMPTY;
 
 	--vect->size;
@@ -190,9 +190,9 @@ mlib_status_t mlib_vector_remove_at(mlib_vector_t *vect, size_t index)
 {
 	if (unlikely(!vect))
 		return MLIB_ERR_NULL_PTR;
-	if (vect->size == 0)
+	if (unlikely(vect->size == 0))
 		return MLIB_ERR_EMPTY;
-	if (index >= vect->size)
+	if (unlikely(index >= vect->size))
 		return MLIB_ERR_OUT_OF_BOUNDS;
 
 	if (index == vect->size - 1)
@@ -222,7 +222,7 @@ mlib_status_t mlib_vector_set(mlib_vector_t *vect, size_t index,
 {
 	if (unlikely(!vect))
 		return MLIB_ERR_NULL_PTR;
-	if (index >= vect->size)
+	if (unlikely(index >= vect->size))
 		return MLIB_ERR_OUT_OF_BOUNDS;
 
 	void *set_ptr = (char *)vect->data + (index * vect->elem_size);
@@ -258,26 +258,17 @@ void *mlib_vector_back(const mlib_vector_t *vect)
 
 void *mlib_vector_data(const mlib_vector_t *vect)
 {
-	if (unlikely(!vect))
-		return NULL;
-
-	return vect->data;
+	return vect ? vect->data : NULL;
 }
 
 size_t mlib_vector_size(const mlib_vector_t *vect)
 {
-	if (unlikely(!vect))
-		return 0;
-
-	return vect->size;
+	return vect ? vect->size : 0;
 }
 
 size_t mlib_vector_capacity(const mlib_vector_t *vect)
 {
-	if (unlikely(!vect))
-		return 0;
-
-	return vect->capacity;
+	return vect ? vect->capacity : 0;
 }
 
 mlib_status_t mlib_vector_reserve(mlib_vector_t *vect, size_t new_capacity)
@@ -386,7 +377,7 @@ mlib_status_t mlib_vector_find(const mlib_vector_t *vect, const void *target,
 {
 	if (unlikely(!vect || !comp))
 		return MLIB_ERR_NULL_PTR;
-	if (vect->size == 0)
+	if (unlikely(vect->size == 0))
 		return MLIB_ERR_EMPTY;
 
 	for (size_t i = 0; i < vect->size; ++i) {
@@ -408,7 +399,7 @@ mlib_status_t mlib_vector_foreach(mlib_vector_t *vect, mlib_callback_fn cb,
 {
 	if (unlikely(!vect || !cb))
 		return MLIB_ERR_NULL_PTR;
-	if (vect->size == 0)
+	if (unlikely(vect->size == 0))
 		return MLIB_SUCCESS;
 
 	for (size_t i = 0; i < vect->size; ++i) {
