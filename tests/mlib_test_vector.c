@@ -753,6 +753,88 @@ void test_reverse(int *passed_tests, int *total_tests)
 	mlib_vector_destroy(&v_large);
 }
 
+void test_swap_remove(int *passed_tests, int *total_tests)
+{
+        puts("Testing MLIB Vector Swap Remove:");
+
+        printf("%*s", STR_PAD, "Testing swap_remove on NULL vector");
+        print_test_result(mlib_vector_swap_remove(NULL, 0) ==
+                                  MLIB_ERR_NULL_PTR,
+                          passed_tests, total_tests);
+
+        mlib_vector_t *vect = create_test_vector(passed_tests, total_tests,
+                                                 sizeof(int), 0, NULL);
+        if (!vect)
+                return;
+
+        printf("%*s", STR_PAD, "Testing swap_remove on empty vector");
+        print_test_result(mlib_vector_swap_remove(vect, 0) == MLIB_ERR_EMPTY,
+                          passed_tests, total_tests);
+
+        int vals[5] = { 10, 20, 30, 40, 50 };
+        for (int i = 0; i < 5; ++i)
+                mlib_vector_push_back(vect, &vals[i]);
+
+        printf("%*s", STR_PAD, "Testing swap_remove out of bounds");
+        print_test_result(mlib_vector_swap_remove(vect, 5) ==
+                                  MLIB_ERR_OUT_OF_BOUNDS,
+                          passed_tests, total_tests);
+
+        /* 
+         * Test swap_remove pe ultimul element (index 4 -> valoarea 50).
+         * Trebuie să delege direct la pop_back fără mutare de elemente.
+         */
+        printf("%*s", STR_PAD, "Testing swap_remove last index (delegates pop)");
+        bool pop_ok = (mlib_vector_swap_remove(vect, 4) == MLIB_SUCCESS) &&
+                      (mlib_vector_size(vect) == 4) &&
+                      (*(int *)mlib_vector_back(vect) == 40);
+        print_test_result(pop_ok, passed_tests, total_tests);
+
+        /* 
+         * Vector curent: [10, 20, 30, 40]
+         * Eliminăm indexul 1 (valoarea 20).
+         * Ultimul element (40) trebuie mutat în locul lui 20.
+         * Vector rezultat: [10, 40, 30]
+         */
+        printf("%*s", STR_PAD, "Testing swap_remove middle index (replaces with last)");
+        bool swap_ok = (mlib_vector_swap_remove(vect, 1) == MLIB_SUCCESS) &&
+                       (mlib_vector_size(vect) == 3);
+        int expected[] = { 10, 40, 30 };
+        for (size_t i = 0; i < 3; ++i) {
+                int *val = (int *)mlib_vector_get(vect, i);
+                if (!val || *val != expected[i]) {
+                        swap_ok = false;
+                        break;
+                }
+        }
+        print_test_result(swap_ok, passed_tests, total_tests);
+
+        mlib_vector_destroy(&vect);
+
+        /* 
+         * Verificare apelare corectă destructor free_fn pe elementul eliminat
+         */
+        vector_free_call_count = 0;
+        mlib_vector_t *vect_dtor = create_test_vector(
+                passed_tests, total_tests, sizeof(int), 0, create_test_free_fn);
+        if (!vect_dtor)
+                return;
+
+        int d1 = 1, d2 = 2;
+        mlib_vector_push_back(vect_dtor, &d1);
+        mlib_vector_push_back(vect_dtor, &d2);
+
+        mlib_vector_swap_remove(vect_dtor, 0);
+
+        printf("%*s", STR_PAD, "Testing swap_remove triggers free_fn");
+        bool dtor_ok = (vector_free_call_count == 1) &&
+                       (mlib_vector_size(vect_dtor) == 1) &&
+                       (*(int *)mlib_vector_get(vect_dtor, 0) == 2);
+        print_test_result(dtor_ok, passed_tests, total_tests);
+
+        mlib_vector_destroy(&vect_dtor);
+}
+
 int main(void)
 {
 	int passed_tests = 0, total_tests = 0;
@@ -772,6 +854,7 @@ int main(void)
 	test_sort(&passed_tests, &total_tests);
 	test_sort_range(&passed_tests, &total_tests);
 	test_reverse(&passed_tests, &total_tests);
+	test_swap_remove(&passed_tests, &total_tests);
 
 	printf("\n==================================================\n");
 	printf("SUMMARY: %d / %d tests passed\n", passed_tests, total_tests);
