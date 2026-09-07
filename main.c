@@ -1,44 +1,36 @@
-#include <mlib/mlib_sll.h>
+#include <mlib/mlib_vector.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-char *random_chars(size_t length, FILE *source)
-{
-	char *random = malloc(length + 1);
-	if (!random)
-		return NULL;
-	random[length] = '\0';
-	fread(random, 1, length, source);
-	for (size_t i = 0; i < length; ++i) {
-		random[i] &= 31;
-		random[i] += 'A';
-	}
-	return random;
-}
+#define INITIAL_N 10
 
-void callback_print(void *data, void *user_data)
+void add_to_sum(void *user_data, void *data)
 {
-	(void)user_data;
-	printf("%s\n", *(char **)data);
+	float x = *(float *)user_data;
+	*(float *)data += x;
 }
 
 int main(void)
 {
-	FILE *rfp = fopen("/dev/urandom", "rb");
-	if (!rfp)
-		return 1;
-	mlib_sll_t *list = mlib_sll_create(free);
-	if (!list)
-		return 1;
-	for (int i = 0; i < 5000; ++i) {
-		char *rand_chars = random_chars(4, rfp);
-		printf("inserting %s\n", rand_chars);
-		(void)mlib_sll_insert_at(list, 1, rand_chars);
+	freopen("data.in", "r", stdin);
+
+	mlib_vector_t *v = mlib_vector_create(sizeof(float), INITIAL_N, NULL);
+	if (unlikely(!v))
+		exit(1);
+
+	int n;
+	printf("Enter dataset size: ");
+	scanf("%d", &n);
+	mlib_vector_resize(v, n);
+
+	puts("Enter data:");
+	float x, avg;
+	for (int i = 0; i < n; ++i) {
+		scanf("%f", &x);
+		mlib_vector_push_back(v, &x);
 	}
 
-	mlib_sll_foreach(list, callback_print, NULL);
+	mlib_vector_foreach(v, add_to_sum, &avg);
+	printf("Average: %.2f\n", avg / n);
 
-	mlib_sll_destroy(&list);
-	fclose(rfp);
 	return 0;
 }
