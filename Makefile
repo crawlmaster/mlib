@@ -27,13 +27,6 @@ ASAN_FLAGS     = -fsanitize=address
 UBSAN_FLAGS    = -fsanitize=undefined
 SANITIZE_FLAGS = $(ASAN_FLAGS) $(UBSAN_FLAGS) -fno-omit-frame-pointer
 
-# Valgrind Configuration
-VALGRIND       = valgrind
-VALGRIND_FLAGS = --leak-check=full \
-                 --show-leak-kinds=all \
-                 --track-origins=yes \
-                 --error-exitcode=1
-
 # Directory Structure
 BIN_DIR       = ./bin
 BUILD_DIR     = ./build
@@ -47,25 +40,33 @@ INC_DIR       = ./include
 # OS Detection & Target Artifacts
 # ------------------------------------------------------------------------------
 ifeq ($(OS),Windows_NT)
-	DETECTED_OS := Windows
-	EXE_EXT     := .exe
-	STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
-	SHARED_LIB  := $(BIN_DIR)/$(PROJECT_NAME).dll
-	TARGET      := $(BIN_DIR)/main.exe
+        DETECTED_OS := Windows
+        EXE_EXT     := .exe
+        STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
+        SHARED_LIB  := $(BIN_DIR)/$(PROJECT_NAME).dll
+        TARGET      := $(BIN_DIR)/main.exe
+        MEMCHECK_CMD = valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1
+        MEMCHECK_TAG_NAME = VALGRIND
 else
-	EXE_EXT :=
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Darwin)
-		DETECTED_OS := macOS
-		STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
-		SHARED_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).dylib
-		TARGET      := $(BIN_DIR)/main
-	else
-		DETECTED_OS := Linux
-		STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
-		SHARED_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).so
-		TARGET      := $(BIN_DIR)/main
-	endif
+        EXE_EXT :=
+        UNAME_S := $(shell uname -s)
+        ifeq ($(UNAME_S),Darwin)
+                DETECTED_OS := macOS
+                STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
+                SHARED_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).dylib
+                TARGET      := $(BIN_DIR)/main
+                # macOS Native Leaks Utility
+                MEMCHECK_CMD = MallocStackLogging=1 leaks --atExit --
+                MEMCHECK_TAG_NAME = LEAKS
+        else
+                DETECTED_OS := Linux
+                STATIC_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).a
+                SHARED_LIB  := $(BIN_DIR)/lib$(PROJECT_NAME).so
+                TARGET      := $(BIN_DIR)/main
+                # Linux Valgrind Configuration
+                MEMCHECK_CMD = valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1
+                MEMCHECK_TAG_NAME = VALGRIND
+        endif
 endif
 
 # Source and Object Files
@@ -107,7 +108,7 @@ TAG_CC       = $(C_BLUE)$(C_BOLD)[ CC ]$(C_RESET)
 TAG_AR       = $(C_MAGENTA)$(C_BOLD)[ AR ]$(C_RESET)
 TAG_LD       = $(C_GREEN)$(C_BOLD)[ LD ]$(C_RESET)
 TAG_RUN      = $(C_CYAN)$(C_BOLD)[ EXEC ]$(C_RESET)
-TAG_MEMCHECK = $(C_YELLOW)$(C_BOLD)[ VALGRIND ]$(C_RESET)
+TAG_MEMCHECK = $(C_YELLOW)$(C_BOLD)[ $(MEMCHECK_TAG_NAME) ]$(C_RESET)
 TAG_SANITIZE = $(C_MAGENTA)$(C_BOLD)[ SANITIZE ]$(C_RESET)
 TAG_FORMAT   = $(C_CYAN)$(C_BOLD)[ FORMAT ]$(C_RESET)
 TAG_PACK     = $(C_MAGENTA)$(C_BOLD)[ PACK ]$(C_RESET)
@@ -235,12 +236,12 @@ test-%: $(STATIC_LIB) $(HDRS) FORCE | $(BIN_DIR) $(OBJ_TESTS_DIR)
 	fi
 
 # ------------------------------------------------------------------------------
-# 3. Valgrind Memory Check: make test-mem / make test-mem-<structura>
+# 3. Memory Check: make test-mem / make test-mem-<structura> (Valgrind or Leaks)
 # ------------------------------------------------------------------------------
 test-mem: CFLAGS += -g3 -O0
-test-mem: clean $(STATIC_LIB) FORCE ## Run Valgrind on all available tests
+test-mem: clean $(STATIC_LIB) FORCE ## Run memory leak checks on all available tests
 ifeq ($(strip $(DATA_STRUCTURES)),)
-	@printf "%b⚠ Nu există teste disponibile pentru analiza Valgrind.%b\n" "$(C_YELLOW)" "$(C_RESET)"
+	@printf "%b⚠ Nu există teste disponibile pentru analiza de memorie.%b\n" "$(C_YELLOW)" "$(C_RESET)"
 else
 	@for ds in $(DATA_STRUCTURES); do \
 		$(MAKE) --no-print-directory test-mem-$$ds CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" || exit 1; \
@@ -250,13 +251,13 @@ endif
 test-mem-%: CFLAGS += -g3 -O0
 test-mem-%: $(STATIC_LIB) $(HDRS) FORCE | $(BIN_DIR) $(OBJ_TESTS_DIR)
 	@if [ ! -f "$(TESTS_DIR)/mlib_test_$*.c" ]; then \
-		printf "%b[ SKIP ] Valgrind skip: %s/mlib_test_%s.c nu a fost găsit%b\n" "$(C_YELLOW)" "$(TESTS_DIR)" "$*" "$(C_RESET)"; \
+		printf "%b[ SKIP ] Memory check skip: %s/mlib_test_%s.c nu a fost găsit%b\n" "$(C_YELLOW)" "$(TESTS_DIR)" "$*" "$(C_RESET)"; \
 	else \
 		$(CC) $(CFLAGS) -c $(TESTS_DIR)/mlib_test_$*.c -o $(OBJ_TESTS_DIR)/mlib_test_$*.o && \
 		$(CC) $(CFLAGS) $(OBJ_TESTS_DIR)/mlib_test_$*.o $(STATIC_LIB) -o $(BIN_DIR)/test_$*$(EXE_EXT) $(LDFLAGS) && \
-		printf "\n%b🔍 Valgrind Memory Check: %s...%b\n" "$(C_YELLOW)$(C_BOLD)" "$*" "$(C_RESET)" && \
+		printf "\n%b🔍 Memory Check (%s): %s...%b\n" "$(C_YELLOW)$(C_BOLD)" "$(MEMCHECK_TAG_NAME)" "$*" "$(C_RESET)" && \
 		printf "%b--------------------------------------------------%b\n" "$(C_DIM)" "$(C_RESET)" && \
-		$(VALGRIND) $(VALGRIND_FLAGS) $(BIN_DIR)/test_$*$(EXE_EXT) && \
+		$(MEMCHECK_CMD) $(BIN_DIR)/test_$*$(EXE_EXT) && \
 		printf "%b--------------------------------------------------%b\n" "$(C_DIM)" "$(C_RESET)"; \
 	fi
 
@@ -307,12 +308,12 @@ sanitize: clean $(TARGET) ## Compile and run main binary with ASan & UBSan
 	@printf "%b✔ Main binary sanitizer check passed!%b\n\n" "$(C_GREEN)$(C_BOLD)" "$(C_RESET)"
 
 memcheck: CFLAGS += -g3 -O0
-memcheck: clean $(TARGET) ## Run Valgrind leak check on main binary
-	@printf "\n%b🔍 Running Valgrind Memory Analysis on %s...%b\n" "$(C_YELLOW)$(C_BOLD)" "$(TARGET)" "$(C_RESET)"
+memcheck: clean $(TARGET) ## Run memory check (Valgrind/leaks) on main binary
+	@printf "\n%b🔍 Running Memory Analysis (%s) on %s...%b\n" "$(C_YELLOW)$(C_BOLD)" "$(MEMCHECK_TAG_NAME)" "$(TARGET)" "$(C_RESET)"
 	@printf "%b--------------------------------------------------%b\n" "$(C_DIM)" "$(C_RESET)"
-	@$(VALGRIND) $(VALGRIND_FLAGS) $(TARGET)
+	@$(MEMCHECK_CMD) $(TARGET)
 	@printf "%b--------------------------------------------------%b\n" "$(C_DIM)" "$(C_RESET)"
-	@printf "%b✔ Main binary memory check completed without leaks!%b\n\n" "$(C_GREEN)$(C_BOLD)" "$(C_RESET)"
+	@printf "%b✔ Main binary memory check completed!%b\n\n" "$(C_GREEN)$(C_BOLD)" "$(C_RESET)"
 
 # ------------------------------------------------------------------------------
 # Code Formatting & Documentation
