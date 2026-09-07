@@ -5,7 +5,7 @@
 
 #define TEST_FAILED "\033[31mFAILED\033[0m"
 #define TEST_PASSED "\033[32mPASSED\033[0m"
-#define STR_PAD	    -50
+#define STR_PAD	    -60
 
 #define TEST_ITEMS_COUNT 10
 
@@ -24,12 +24,12 @@ static int cmp_int(const void *a, const void *b)
 	return (va > vb) - (va < vb);
 }
 
-static void foreach_increment_cb(void **data, void *user_data)
+static void foreach_increment_cb(void *data, void *user_data)
 {
-	if (!data || !*data)
+	if (!data || !(void **)data)
 		return;
 
-	int *val = (int *)*data;
+	int *val = *(int **)data;
 	int  step = user_data ? *(int *)user_data : 1;
 	*val += step;
 }
