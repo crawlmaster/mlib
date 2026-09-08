@@ -2,6 +2,10 @@
 #include <mlib/mlib_vector.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct mlib_stack {
 	mlib_vector_t *vect;
 };
@@ -84,3 +88,7 @@ void mlib_stack_destroy(mlib_stack_t **stack)
 	free(*stack);
 	*stack = NULL;
 }
+
+#ifdef __cplusplus
+}
+#endif

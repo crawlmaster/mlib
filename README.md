@@ -27,3 +27,15 @@ make sanitize
 # Run memory leak checks with Valgrind
 make memcheck
 ```
+
+## Prerequisites & Build Tools
+
+* **C Compiler:** GCC 9+ or Clang 11+ (C11 support required)
+* **Build System:** **GNU Make 4.0+**
+
+### macOS Notice
+Apple bundles an outdated **GNU Make 3.81** with Xcode Command Line Tools. To avoid pattern rule resolution issues with unit test targets, install and use a modern GNU Make:
+
+```bash
+brew install make
+```

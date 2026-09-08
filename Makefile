@@ -3,6 +3,14 @@
 # Cross-Platform: Linux, macOS, Windows (MinGW/MSYS2)
 # ==============================================================================
 
+# Ensure GNU Make >= 4.0
+ifeq ($(filter 4.%,$(firstword $(MAKE_VERSION))),)
+    $(warning [WARN] You are using GNU Make $(MAKE_VERSION). Version 4.0+ is recommended.)
+    ifeq ($(shell uname -s),Darwin)
+        $(error Outdated Make detected on macOS. Please run with 'gmake' (brew install make))
+    endif
+endif
+
 CC ?= gcc
 AR ?= ar
 ARFLAGS = rcs
@@ -19,7 +27,7 @@ PICFLAG  ?= -fPIC
 
 # Package Metadata
 PROJECT_NAME = mlib
-VERSION      = 0.5.4
+VERSION      = 0.6.6
 ARCHIVE_NAME = $(PROJECT_NAME)-v$(VERSION).tar.gz
 
 # Sanitizers Configuration
