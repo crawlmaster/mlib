@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-typedef enum {
+typedef enum mlib_status_codes {
 	MLIB_SUCCESS = 0,
 	MLIB_ERR_NULL_PTR,
 	MLIB_ERR_ALLOC,
