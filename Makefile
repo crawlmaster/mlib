@@ -27,7 +27,7 @@ PICFLAG  ?= -fPIC
 
 # Package Metadata
 PROJECT_NAME = mlib
-VERSION      = 0.6.6
+VERSION      = 0.7.7
 ARCHIVE_NAME = $(PROJECT_NAME)-v$(VERSION).tar.gz
 
 # Sanitizers Configuration

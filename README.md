@@ -5,7 +5,7 @@ A modular, generic, and memory-safe data structures library written in C11.
 ## Modules Roadmap
 - [x] Singly Linked Lists
 - [x] Dynamic Vector
-- [ ] Generic Stack / Queue
+- [x] Generic Stack / Queue
 - [ ] Binary Heap & Priority Queue
 - [ ] Binary Search Tree & AVL Tree
 - [ ] Red-Black Tree
