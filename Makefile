@@ -338,7 +338,8 @@ format: ## Auto-format all source/header files with clang-format
 doc: ## Generate Doxygen HTML documentation
 	@if command -v doxygen >/dev/null 2>&1; then \
 		printf "  %-20b Generating documentation...\n" "$(TAG_DOC)"; \
-		doxygen Doxyfile 2>/dev/null || (doxygen -g >/dev/null 2>&1 && doxygen Doxyfile >/dev/null 2>&1); \
+		mkdir -p docs; \
+		doxygen Doxyfile; \
 		printf "%b✔ Documentation generated in docs/html%b\n" "$(C_GREEN)" "$(C_RESET)"; \
 	else \
 		printf "%b⚠ Doxygen is not installed on this system.%b\n" "$(C_YELLOW)" "$(C_RESET)"; \
@@ -383,5 +384,5 @@ uninstall: ## Remove installed headers and libraries from system
 # ------------------------------------------------------------------------------
 clean: ## Remove all build artifacts, archives, and binaries
 	@printf "  %-20b Removing %b%s%b and %b%s%b\n" "$(TAG_CLEAN)" "$(C_RED)" "$(BUILD_DIR)" "$(C_RESET)" "$(C_RED)" "$(BIN_DIR)" "$(C_RESET)"
-	@rm -rf $(BUILD_DIR) $(BIN_DIR) $(ARCHIVE_NAME) docs/
+	@rm -rf $(BUILD_DIR) $(BIN_DIR) $(ARCHIVE_NAME) docs/ html/ latex/
 	@printf "%b✔ Cleanup complete.%b\n" "$(C_GREEN)" "$(C_RESET)"

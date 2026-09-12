@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /**
- * @struct mlib_vector
+ * @typedef mlib_vector_t
  * @brief Main dynamic array container handle (opaque).
  */
 typedef struct mlib_vector mlib_vector_t;
@@ -52,7 +52,7 @@ typedef struct mlib_vector mlib_vector_t;
  * @note **Thread Safety:** Thread-safe for invocation across distinct instances.
  */
 mlib_vector_t *mlib_vector_create(size_t elem_size, size_t initial_capacity,
-				  mlib_free_fn free_fn);
+                                  mlib_free_fn free_fn);
 
 /**
  * @brief Removes and destroys all stored elements, resetting size to 0.
@@ -107,10 +107,10 @@ void mlib_vector_destroy(mlib_vector_t **vect);
  *                     If `NULL`, the appended slot is zero-initialized.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element successfully appended.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Buffer expansion failed due to memory exhaustion
- *                                or integer overflow. Vector remains unmodified.
+ *         - #MLIB_SUCCESS : Element successfully appended.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Buffer expansion failed due to memory exhaustion
+ *                             or integer overflow. Vector remains unmodified.
  *
  * @warning **Pointer Invalidation:** If geometric growth triggers buffer reallocation,
  *          all raw element pointers previously retrieved are invalidated.
@@ -139,10 +139,10 @@ mlib_status_t mlib_vector_push_back(mlib_vector_t *vect, const void *elem);
  *                      If `NULL`, the slot at `index` is zero-initialized.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element successfully inserted.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index > size`.
- *         - @ref MLIB_ERR_ALLOC: Buffer reallocation failed. Vector remains unmodified.
+ *         - #MLIB_SUCCESS : Element successfully inserted.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index > size`.
+ *         - #MLIB_ERR_ALLOC : Buffer reallocation failed. Vector remains unmodified.
  *
  * @warning **Pointer Invalidation:** Reallocation invalidates all existing element pointers.
  *          Even without reallocation, any pointers to elements at or after `index` are
@@ -155,7 +155,7 @@ mlib_status_t mlib_vector_push_back(mlib_vector_t *vect, const void *elem);
  * @note **Thread Safety:** Not thread-safe.
  */
 mlib_status_t mlib_vector_insert_at(mlib_vector_t *vect, size_t index,
-				    const void *elem);
+                                    const void *elem);
 
 /* ========================================================================== */
 /* Removal Operations                                                         */
@@ -169,9 +169,9 @@ mlib_status_t mlib_vector_insert_at(mlib_vector_t *vect, size_t index,
  * @param[in,out] vect Pointer to the target vector instance.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Last element removed.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: Vector contains zero elements.
+ *         - #MLIB_SUCCESS : Last element removed.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_EMPTY : Vector contains zero elements.
  *
  * @warning **Pointer Invalidation:** Any pointer referencing the popped back element
  *          is invalidated.
@@ -193,10 +193,10 @@ mlib_status_t mlib_vector_pop_back(mlib_vector_t *vect);
  * @param[in]     index 0-based position to remove (`0` through `size - 1`).
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element removed and gap closed.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: Vector contains zero elements.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index >= size`.
+ *         - #MLIB_SUCCESS : Element removed and gap closed.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_EMPTY : Vector contains zero elements.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index >= size`.
  *
  * @warning **Pointer Invalidation:** Pointers to elements at or after `index` are
  *          invalidated or relocated.
@@ -220,10 +220,10 @@ mlib_status_t mlib_vector_remove_at(mlib_vector_t *vect, size_t index);
  * @param[in]     index 0-based position to remove (`0` through `size - 1`).
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element removed via swap.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: Vector contains zero elements.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index >= size`.
+ *         - #MLIB_SUCCESS : Element removed via swap.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_EMPTY : Vector contains zero elements.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index >= size`.
  *
  * @warning **Pointer Invalidation:** Pointers to the element at `index` and the element
  *          at `size - 1` are invalidated or refer to swapped contents.
@@ -275,9 +275,9 @@ void *mlib_vector_get(const mlib_vector_t *vect, size_t index);
  *                      If `NULL`, the slot at `index` is zero-initialized.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Slot payload replaced.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index >= size`.
+ *         - #MLIB_SUCCESS : Slot payload replaced.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index >= size`.
  *
  * @note **Aliasing:** Safe if `elem` points directly to the target slot (`set_ptr == elem`).
  * @note **Ownership:** Value semantics. Payload is copied into the vector.
@@ -285,7 +285,7 @@ void *mlib_vector_get(const mlib_vector_t *vect, size_t index);
  * @note **Thread Safety:** Not thread-safe.
  */
 mlib_status_t mlib_vector_set(mlib_vector_t *vect, size_t index,
-			      const void *elem);
+                              const void *elem);
 
 /**
  * @brief Retrieves a direct pointer to the first element in the vector.
@@ -375,9 +375,9 @@ size_t mlib_vector_capacity(const mlib_vector_t *vec);
  * @param[in]     new_capacity Minimum required capacity slot count.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Buffer reserved or was already large enough.
- *         - @ref MLIB_ERR_NULL_PTR: `vec` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Memory reallocation failed or integer overflow occurred.
+ *         - #MLIB_SUCCESS : Buffer reserved or was already large enough.
+ *         - #MLIB_ERR_NULL_PTR : `vec` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Memory reallocation failed or integer overflow occurred.
  *
  * @warning **Pointer Invalidation:** Buffer reallocation invalidates all existing element pointers.
  *
@@ -400,9 +400,9 @@ mlib_status_t mlib_vector_reserve(mlib_vector_t *vec, size_t new_capacity);
  * @param[in]     new_size Desired element count.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Vector resized.
- *         - @ref MLIB_ERR_NULL_PTR: `vec` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Reallocation failed or byte calculation overflowed.
+ *         - #MLIB_SUCCESS : Vector resized.
+ *         - #MLIB_ERR_NULL_PTR : `vec` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Reallocation failed or byte calculation overflowed.
  *
  * @warning **Pointer Invalidation:** Buffer reallocation or truncation invalidates
  *          affected element pointers.
@@ -421,9 +421,9 @@ mlib_status_t mlib_vector_resize(mlib_vector_t *vec, size_t new_size);
  * @param[in,out] vec Pointer to the vector instance.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Buffer resized to match size (or already matched).
- *         - @ref MLIB_ERR_NULL_PTR: `vec` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Buffer reallocation failed (state remains unchanged).
+ *         - #MLIB_SUCCESS : Buffer resized to match size (or already matched).
+ *         - #MLIB_ERR_NULL_PTR : `vec` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Buffer reallocation failed (state remains unchanged).
  *
  * @warning **Pointer Invalidation:** Buffer reallocation invalidates all existing element pointers.
  *
@@ -449,15 +449,15 @@ mlib_status_t mlib_vector_shrink_to_fit(mlib_vector_t *vec);
  *                       If not found, receives `size`. Pass `NULL` if not needed.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Match found; `*out_index` populated if provided.
- *         - @ref MLIB_ERR_NULL_PTR: `vec` or `comp` was `NULL`.
- *         - @ref MLIB_ERR_NOT_FOUND: No matching element found; `*out_index` set to `size`.
+ *         - #MLIB_SUCCESS : Match found; `*out_index` populated if provided.
+ *         - #MLIB_ERR_NULL_PTR : `vec` or `comp` was `NULL`.
+ *         - #MLIB_ERR_NOT_FOUND : No matching element found; `*out_index` set to `size`.
  *
  * @note **Complexity:** O(N) comparisons where N is `size`.
  * @note **Thread Safety:** Safe for concurrent read-only access if `comp` is pure.
  */
 mlib_status_t mlib_vector_find(const mlib_vector_t *vec, const void *target,
-			       mlib_compar_fn comp, size_t *out_index);
+                               mlib_compar_fn comp, size_t *out_index);
 
 /**
  * @brief Invokes a visitor callback for each element in the vector from index 0 to `size - 1`.
@@ -467,8 +467,8 @@ mlib_status_t mlib_vector_find(const mlib_vector_t *vec, const void *target,
  * @param[in,out] user_data Arbitrary pointer forwarded to `cb`. Can be `NULL`.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Traversal completed across all elements.
- *         - @ref MLIB_ERR_NULL_PTR: `vec` or `cb` was `NULL`.
+ *         - #MLIB_SUCCESS : Traversal completed across all elements.
+ *         - #MLIB_ERR_NULL_PTR : `vec` or `cb` was `NULL`.
  *
  * @warning **Structural Mutation:** The callback `cb` must not invoke modifying operations
  *          that alter capacity or size on `vec`. In-place mutations to element values are allowed.
@@ -477,7 +477,7 @@ mlib_status_t mlib_vector_find(const mlib_vector_t *vec, const void *target,
  * @note **Thread Safety:** Not thread-safe.
  */
 mlib_status_t mlib_vector_foreach(mlib_vector_t *vec, mlib_callback_fn cb,
-				  void *user_data);
+                                  void *user_data);
 
 /* ========================================================================== */
 /* Algorithms & Transformations                                               */
@@ -498,9 +498,9 @@ mlib_status_t mlib_vector_foreach(mlib_vector_t *vec, mlib_callback_fn cb,
  *                      Must not be `NULL`.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Range sorted (or range had fewer than 2 elements).
- *         - @ref MLIB_ERR_NULL_PTR: `vect` or `comp` was `NULL`.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: Specified range extends beyond `size`.
+ *         - #MLIB_SUCCESS : Range sorted (or range had fewer than 2 elements).
+ *         - #MLIB_ERR_NULL_PTR : `vect` or `comp` was `NULL`.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : Specified range extends beyond `size`.
  *
  * @warning **Pointer Invalidation:** While buffer capacity does not change, individual
  *          element positions within `[start, start + n)` are reordered.
@@ -509,7 +509,7 @@ mlib_status_t mlib_vector_foreach(mlib_vector_t *vec, mlib_callback_fn cb,
  * @note **Thread Safety:** Not thread-safe.
  */
 mlib_status_t mlib_vector_sort_range(mlib_vector_t *vect, size_t start,
-				     size_t n, mlib_compar_fn comp);
+                                     size_t n, mlib_compar_fn comp);
 
 /**
  * @brief Sorts all elements in the vector in-place using standard `qsort`.
@@ -521,8 +521,8 @@ mlib_status_t mlib_vector_sort_range(mlib_vector_t *vect, size_t start,
  *                     Must not be `NULL`.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Entire vector sorted.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` or `comp` was `NULL`.
+ *         - #MLIB_SUCCESS : Entire vector sorted.
+ *         - #MLIB_ERR_NULL_PTR : `vect` or `comp` was `NULL`.
  *
  * @note **Complexity:** O(N log N) comparisons where N is `size`.
  * @note **Thread Safety:** Not thread-safe.
@@ -540,10 +540,10 @@ mlib_status_t mlib_vector_sort(mlib_vector_t *vect, mlib_compar_fn comp);
  *                     If `size < 2`, performs no operations.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Vector order reversed.
- *         - @ref MLIB_ERR_NULL_PTR: `vect` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Fallback scratch buffer allocation failed
- *                                (only for `elem_size > 256` bytes).
+ *         - #MLIB_SUCCESS : Vector order reversed.
+ *         - #MLIB_ERR_NULL_PTR : `vect` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Fallback scratch buffer allocation failed
+ *                             (only for `elem_size > 256` bytes).
  *
  * @warning **Pointer Invalidation:** Element positions are mirrored; pointers to specific
  *          indices now observe elements from their symmetric positions.

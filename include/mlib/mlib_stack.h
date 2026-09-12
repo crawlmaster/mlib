@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 /**
- * @struct mlib_stack
+ * @typedef mlib_stack_t
  * @brief Main LIFO stack container handle (opaque).
  */
 typedef struct mlib_stack mlib_stack_t;
@@ -46,7 +46,7 @@ typedef struct mlib_stack mlib_stack_t;
  * @note **Thread Safety:** Thread-safe for invocation (independent instances).
  */
 mlib_stack_t *mlib_stack_create(size_t elem_size, size_t initial_capacity,
-				mlib_free_fn free_fn);
+                                mlib_free_fn free_fn);
 
 /**
  * @brief Removes and cleans up all elements, resetting stack size to 0.
@@ -100,9 +100,9 @@ void mlib_stack_destroy(mlib_stack_t **stack);
  *                      If `NULL`, the newly allocated element slot is filled with zero bytes.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element successfully pushed.
- *         - @ref MLIB_ERR_NULL_PARAM: `stack` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Internal buffer reallocation failed (stack remains unmodified).
+ *         - #MLIB_SUCCESS : Element successfully pushed.
+ *         - #MLIB_ERR_NULL_PARAM : `stack` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Internal buffer reallocation failed (stack remains unmodified).
  *
  * @warning **Pointer Invalidation:** If geometric growth triggers buffer reallocation,
  *          any pointer previously retrieved via @ref mlib_stack_peek is invalidated.
@@ -124,9 +124,9 @@ mlib_status_t mlib_stack_push(mlib_stack_t *stack, const void *elem);
  * @param[in,out] stack Pointer to the stack container.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Top element removed.
- *         - @ref MLIB_ERR_NULL_PARAM: `stack` was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: Stack contains zero elements.
+ *         - #MLIB_SUCCESS : Top element removed.
+ *         - #MLIB_ERR_NULL_PARAM : `stack` was `NULL`.
+ *         - #MLIB_ERR_EMPTY : Stack contains zero elements.
  *
  * @warning **Pointer Invalidation:** Pointers to the popped element previously
  *          obtained via @ref mlib_stack_peek become invalid.
@@ -211,9 +211,9 @@ bool mlib_stack_is_empty(const mlib_stack_t *stack);
  * @param[in]     new_capacity Minimum required slot capacity.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Buffer expanded or was already sufficient.
- *         - @ref MLIB_ERR_NULL_PARAM: `stack` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Heap reallocation failed (state remains unchanged).
+ *         - #MLIB_SUCCESS : Buffer expanded or was already sufficient.
+ *         - #MLIB_ERR_NULL_PARAM : `stack` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Heap reallocation failed (state remains unchanged).
  *
  * @warning **Pointer Invalidation:** Reallocation invalidates existing pointers from @ref mlib_stack_peek.
  *
@@ -231,9 +231,9 @@ mlib_status_t mlib_stack_reserve(mlib_stack_t *stack, size_t new_capacity);
  * @param[in,out] stack Pointer to the stack instance.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Buffer resized to match size.
- *         - @ref MLIB_ERR_NULL_PARAM: `stack` was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Reallocation failed (buffer remains unchanged).
+ *         - #MLIB_SUCCESS : Buffer resized to match size.
+ *         - #MLIB_ERR_NULL_PARAM : `stack` was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Reallocation failed (buffer remains unchanged).
  *
  * @warning **Pointer Invalidation:** Reallocation invalidates existing pointers from @ref mlib_stack_peek.
  *

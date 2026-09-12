@@ -16,10 +16,10 @@
 /* ========================================================================== */
 
 #include "common.h"
-#include "mlib_sll.h"
-#include "mlib_vector.h"
-#include "mlib_stack.h"
 #include "mlib_queue.h"
+#include "mlib_sll.h"
+#include "mlib_stack.h"
+#include "mlib_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
  * @brief Macro for compile-time version compatibility testing.
  *
  * Evaluates to a monotonically increasing integer that can be used in
- * preprocessor directives (e.g., `#if MLIB_VERSION >= MLIB_VERSION_CHECK(0, 5, 0)`).
+ * preprocessor directives (e.g., `#if MLIB_VERSION >= MLIB_VERSION_CHECK(0, 8, 0)`).
  */
 #define MLIB_VERSION_CHECK(major, minor, patch) \
         (((major) << 16) | ((minor) << 8) | (patch))
@@ -53,7 +53,7 @@ extern "C" {
         MLIB_VERSION_CHECK(MLIB_VERSION_MAJOR, MLIB_VERSION_MINOR, MLIB_VERSION_PATCH)
 
 /** String literal representation of the current library semantic version. */
-#define MLIB_VERSION_STRING "0.5.4"
+#define MLIB_VERSION_STRING "0.8.0"
 
 /* ========================================================================== */
 /* Runtime Version Utilities                                                  */
@@ -65,7 +65,7 @@ extern "C" {
  * Facilitates verification that the linked binary or shared object
  * matches the header declarations.
  *
- * @return Null-terminated string literal adhering to Semantic Versioning (e.g. "0.5.4").
+ * @return Null-terminated string literal adhering to Semantic Versioning (e.g. "0.8.0").
  *
  * @note **Ownership:** The returned pointer references a static string literal;
  *       caller must NOT attempt to modify or free it.

@@ -18,19 +18,19 @@ extern "C" {
 #endif
 
 /**
- * @struct mlib_sll_node
+ * @typedef mlib_sll_node_t
  * @brief Internal node representation holding pointer payload and next reference (opaque).
  */
 typedef struct mlib_sll_node mlib_sll_node_t;
 
 /**
- * @struct mlib_sll
+ * @typedef mlib_sll_t
  * @brief Singly linked list container handle (opaque).
  */
-typedef struct mlib_sll mlib_sll_t;
+typedef struct mlib_sll      mlib_sll_t;
 
 /**
- * @struct mlib_sll_iter
+ * @typedef mlib_sll_iter_t
  * @brief Forward traversal iterator referencing an active list node (opaque).
  */
 typedef struct mlib_sll_iter mlib_sll_iter_t;
@@ -102,9 +102,9 @@ void mlib_sll_destroy(mlib_sll_t **list);
  * @param[in]     data Generic payload pointer to store. `NULL` is allowed.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element inserted successfully.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Internal node allocation failed.
+ *         - #MLIB_SUCCESS : Element inserted successfully.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Internal node allocation failed.
  *
  * @note **Ownership:** The list stores the raw `data` pointer. Caller retains
  *       ownership unless `free_fn` was supplied at list creation.
@@ -120,9 +120,9 @@ mlib_status_t mlib_sll_insert_head(mlib_sll_t *list, void *data);
  * @param[in]     data Generic payload pointer to store. `NULL` is allowed.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element appended successfully.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Internal node allocation failed.
+ *         - #MLIB_SUCCESS : Element appended successfully.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Internal node allocation failed.
  *
  * @note **Ownership:** Reference semantics. The raw pointer is stored as-is.
  * @note **Complexity:** O(1) due to tail pointer tracking.
@@ -143,10 +143,10 @@ mlib_status_t mlib_sll_insert_tail(mlib_sll_t *list, void *data);
  * @param[in]     data  Generic payload pointer to store. `NULL` is allowed.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element placed at `index`.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index > size`.
- *         - @ref MLIB_ERR_ALLOC: Internal node allocation failed.
+ *         - #MLIB_SUCCESS : Element placed at `index`.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index > size`.
+ *         - #MLIB_ERR_ALLOC : Internal node allocation failed.
  *
  * @note **Complexity:** O(1) for `index == 0` or `index == size`; O(index) otherwise.
  * @note **Thread Safety:** Not thread-safe.
@@ -166,9 +166,9 @@ mlib_status_t mlib_sll_insert_at(mlib_sll_t *list, size_t index, void *data);
  * @param[in,out] list Pointer to the target list container.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Head element removed.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: List contains zero elements.
+ *         - #MLIB_SUCCESS : Head element removed.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_EMPTY : List contains zero elements.
  *
  * @warning **Pointer Invalidation:** Iterators referencing the removed head node
  *          become invalid immediately.
@@ -187,9 +187,9 @@ mlib_status_t mlib_sll_remove_head(mlib_sll_t *list);
  * @param[in,out] list Pointer to the target list container.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Tail element removed.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: List contains zero elements.
+ *         - #MLIB_SUCCESS : Tail element removed.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_EMPTY : List contains zero elements.
  *
  * @warning **Pointer Invalidation:** Iterators referencing the removed tail node
  *          become invalid immediately.
@@ -211,10 +211,10 @@ mlib_status_t mlib_sll_remove_tail(mlib_sll_t *list);
  * @param[in]     index 0-based position to remove (`0` through `size - 1`).
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Node at `index` removed.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` pointer was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: List is empty.
- *         - @ref MLIB_ERR_OUT_OF_BOUNDS: `index >= size`.
+ *         - #MLIB_SUCCESS : Node at `index` removed.
+ *         - #MLIB_ERR_NULL_PARAM : `list` pointer was `NULL`.
+ *         - #MLIB_ERR_EMPTY : List is empty.
+ *         - #MLIB_ERR_OUT_OF_BOUNDS : `index >= size`.
  *
  * @warning **Pointer Invalidation:** Any iterator referencing the node at `index`
  *          is invalidated.
@@ -254,15 +254,15 @@ size_t mlib_sll_size(const mlib_sll_t *list);
  *                       is written. Pass `NULL` if only status check is desired.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Match found; `*out_index` populated if non-null.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` or `comp` was `NULL`.
- *         - @ref MLIB_ERR_NOT_FOUND: Traversal completed without matching elements.
+ *         - #MLIB_SUCCESS : Match found; `*out_index` populated if non-null.
+ *         - #MLIB_ERR_NULL_PARAM : `list` or `comp` was `NULL`.
+ *         - #MLIB_ERR_NOT_FOUND : Traversal completed without matching elements.
  *
  * @note **Complexity:** O(N) where N is the element count.
  * @note **Thread Safety:** Safe for concurrent read-only access if `comp` is pure.
  */
 mlib_status_t mlib_sll_find(const mlib_sll_t *list, const void *data,
-			    mlib_compar_fn comp, size_t *out_index);
+                            mlib_compar_fn comp, size_t *out_index);
 
 /**
  * @brief Applies a visitor callback to each element payload in sequence from head to tail.
@@ -273,8 +273,8 @@ mlib_status_t mlib_sll_find(const mlib_sll_t *list, const void *data,
  * @param[in,out] user_data Context pointer forwarded to `cb`. Can be `NULL`.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Callback executed over all nodes.
- *         - @ref MLIB_ERR_NULL_PARAM: `list` or `cb` was `NULL`.
+ *         - #MLIB_SUCCESS : Callback executed over all nodes.
+ *         - #MLIB_ERR_NULL_PARAM : `list` or `cb` was `NULL`.
  *
  * @warning **Structural Mutation:** The callback `cb` must not invoke structural
  *          mutation functions (`insert_*`, `remove_*`, `clear`) on `list`.
@@ -283,7 +283,7 @@ mlib_status_t mlib_sll_find(const mlib_sll_t *list, const void *data,
  * @note **Thread Safety:** Not thread-safe.
  */
 mlib_status_t mlib_sll_foreach(mlib_sll_t *list, mlib_callback_fn cb,
-			       void *user_data);
+                               void *user_data);
 
 /* ========================================================================== */
 /* Iterator Interface                                                         */

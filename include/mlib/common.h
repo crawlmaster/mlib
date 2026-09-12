@@ -10,29 +10,24 @@
 #ifndef MLIB_COMMON_H
 #define MLIB_COMMON_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 /* ========================================================================== */
 /* Compiler Optimization & Utility Macros                                     */
 /* ========================================================================== */
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__) || defined(DOXYGEN)
 /**
  * @def likely(x)
- * @brief Instructs the compiler's branch predictor that expression `x` evaluates to true.
- *
- * Emits `__builtin_expect` to arrange code paths so that the condition branch
- * is favored in the instruction cache.
+ * @brief Branch prediction hint indicating that expression `x` is expected to evaluate to true.
  */
-#define likely(x) __builtin_expect(!!(x), 1)
+#define likely(x)   __builtin_expect(!!(x), 1)
 
 /**
  * @def unlikely(x)
- * @brief Instructs the compiler's branch predictor that expression `x` evaluates to false.
- *
- * Used primarily for defensive validation and rare error conditions (e.g., allocation failure).
+ * @brief Branch prediction hint indicating that expression `x` is expected to evaluate to false.
  */
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #else
@@ -58,28 +53,34 @@ extern "C" {
  * @enum mlib_status_codes
  * @brief Standardized status codes returned by fallible mlib operations.
  */
-typedef enum mlib_status_codes {
-	/** Operation completed successfully without errors. */
-	MLIB_SUCCESS = 0,
+enum mlib_status_codes {
+        /** Operation completed successfully without errors. */
+        MLIB_SUCCESS = 0,
 
-	/** An illegal NULL pointer was supplied for a required handle or argument. */
-	MLIB_ERR_NULL_PTR = 1,
+        /** An illegal NULL pointer was supplied for a required handle or argument. */
+        MLIB_ERR_NULL_PTR = 1,
 
-	/** Alias for @ref MLIB_ERR_NULL_PTR ensuring API naming parity across headers. */
-	MLIB_ERR_NULL_PARAM = 1,
+        /** Alias for #MLIB_ERR_NULL_PTR ensuring API naming parity across headers. */
+        MLIB_ERR_NULL_PARAM = 1,
 
-	/** Memory allocation or reallocation via the system allocator failed. */
-	MLIB_ERR_ALLOC = 2,
+        /** Memory allocation or reallocation via the system allocator failed. */
+        MLIB_ERR_ALLOC = 2,
 
-	/** Operation cannot proceed because the container contains zero elements. */
-	MLIB_ERR_EMPTY = 3,
+        /** Operation cannot proceed because the container contains zero elements. */
+        MLIB_ERR_EMPTY = 3,
 
-	/** An index or sub-range specification exceeded the container's valid bounds. */
-	MLIB_ERR_OUT_OF_BOUNDS = 4,
+        /** An index or sub-range specification exceeded the container's valid bounds. */
+        MLIB_ERR_OUT_OF_BOUNDS = 4,
 
-	/** Requested element or lookup target was not located during search. */
-	MLIB_ERR_NOT_FOUND = 5
+        /** Requested element or lookup target was not located during search. */
+        MLIB_ERR_NOT_FOUND = 5
 } mlib_status_t;
+
+/**
+ * @typedef mlib_status_t
+ * @brief Status code type representing the outcome of mlib operations.
+ */
+typedef enum mlib_status_codes mlib_status_t;
 
 /* ========================================================================== */
 /* Generic Callback Function Signatures                                       */
@@ -147,8 +148,8 @@ typedef void (*mlib_callback_fn)(void *data, void *user_data);
  */
 static inline void mlib_free_indirect(void *elem)
 {
-	if (elem && *(void **)elem)
-		free(*(void **)elem);
+        if (elem && *(void **)elem)
+                free(*(void **)elem);
 }
 
 #ifdef __cplusplus

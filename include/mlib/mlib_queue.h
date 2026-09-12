@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /**
- * @struct mlib_queue
+ * @typedef mlib_queue_t
  * @brief Main FIFO ring buffer queue container handle (opaque).
  */
 typedef struct mlib_queue mlib_queue_t;
@@ -50,7 +50,7 @@ typedef struct mlib_queue mlib_queue_t;
  * @note **Thread Safety:** Thread-safe for invocation (independent instances).
  */
 mlib_queue_t *mlib_queue_create(size_t elem_size, size_t initial_capacity,
-				mlib_free_fn free_fn);
+                                mlib_free_fn free_fn);
 
 /**
  * @brief Removes and cleans up all stored elements, resetting size to 0.
@@ -106,9 +106,9 @@ void mlib_queue_destroy(mlib_queue_t **queue);
  *                      If `NULL`, the newly allocated slot is zero-initialized.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Element appended to back.
- *         - @ref MLIB_ERR_NULL_PARAM: `queue` pointer was `NULL`.
- *         - @ref MLIB_ERR_ALLOC: Buffer expansion/realignment failed (state remains unchanged).
+ *         - #MLIB_SUCCESS : Element appended to back.
+ *         - #MLIB_ERR_NULL_PARAM : `queue` pointer was `NULL`.
+ *         - #MLIB_ERR_ALLOC : Buffer expansion/realignment failed (state remains unchanged).
  *
  * @warning **Pointer Invalidation:** Buffer reallocation invalidates any raw pointers
  *          previously retrieved via @ref mlib_queue_peek.
@@ -130,9 +130,9 @@ mlib_status_t mlib_queue_push(mlib_queue_t *queue, const void *elem);
  * @param[in,out] queue Pointer to the target queue container.
  *
  * @return Status code indicating the outcome:
- *         - @ref MLIB_SUCCESS: Front element removed.
- *         - @ref MLIB_ERR_NULL_PARAM: `queue` pointer was `NULL`.
- *         - @ref MLIB_ERR_EMPTY: Queue contains zero elements.
+ *         - #MLIB_SUCCESS : Front element removed.
+ *         - #MLIB_ERR_NULL_PARAM : `queue` pointer was `NULL`.
+ *         - #MLIB_ERR_EMPTY : Queue contains zero elements.
  *
  * @warning **Pointer Invalidation:** Pointers to the dequeued element previously
  *          obtained via @ref mlib_queue_peek become invalid.
