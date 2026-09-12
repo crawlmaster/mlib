@@ -104,6 +104,12 @@ static inline ptrdiff_t mlib_queue_ptr_offset(const mlib_queue_t *queue,
 	return -1;
 }
 
+/**
+ * @brief Helper function used to reorder a queue's internals after it has been
+ * resized, ensuring it maintains its intended functionalities
+ * @param queue a pointer to a queue; must NOT be NULL
+ * @param old_capacity the capacity of the queue prior to its resizing
+ */
 static inline void mlib_queue_reorder_after_realloc(mlib_queue_t *queue,
 						    size_t	  old_capacity)
 {
@@ -159,15 +165,6 @@ static inline void mlib_queue_shrink_if_needed(mlib_queue_t *queue)
 	queue->mask = new_cap - 1;
 }
 
-/**
- * @brief Creates a new queue by allocating memory for it on the heap
- * @param elem_size the size of a single element that will be stored
- * @param initial_capacity the initial queue capacity
- * @param free_fn an `mlib_free_fn` that will be called when freeing queue data
- * @return the address of the queue in memory, or `NULL` if the allocation fails
- * @important the `initial_capacity` will be rounded to the next highest power of 2
- * @important if the `initial_capacity` is too large, the function will return `NULL`
- */
 mlib_queue_t *mlib_queue_create(size_t elem_size, size_t initial_capacity,
 				mlib_free_fn free_fn)
 {

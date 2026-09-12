@@ -8,7 +8,7 @@
 
 #define TEST_FAILED "\033[31mFAILED\033[0m"
 #define TEST_PASSED "\033[32mPASSED\033[0m"
-#define STR_PAD	    -50
+#define STR_PAD	    -60
 
 #define TEST_ITEMS_COUNT 16
 

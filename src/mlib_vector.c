@@ -373,29 +373,29 @@ void mlib_vector_clear(mlib_vector_t *vect)
 }
 
 mlib_status_t mlib_vector_find(const mlib_vector_t *vect, const void *target,
-                               mlib_compar_fn comp, size_t *out_index)
+			       mlib_compar_fn comp, size_t *out_index)
 {
-        if (unlikely(!vect || !comp))
-                return MLIB_ERR_NULL_PTR;
+	if (unlikely(!vect || !comp))
+		return MLIB_ERR_NULL_PTR;
 
-        if (unlikely(vect->size == 0)) {
-                if (out_index)
-                        *out_index = 0;
-                return MLIB_ERR_NOT_FOUND;
-        }
+	if (unlikely(vect->size == 0)) {
+		if (out_index)
+			*out_index = 0;
+		return MLIB_ERR_NOT_FOUND;
+	}
 
-        for (size_t i = 0; i < vect->size; ++i) {
-                void *data_ptr = (char *)vect->data + (i * vect->elem_size);
-                if (unlikely(comp(data_ptr, target) == 0)) {
-                        if (out_index)
-                                *out_index = i;
-                        return MLIB_SUCCESS;
-                }
-        }
+	for (size_t i = 0; i < vect->size; ++i) {
+		void *data_ptr = (char *)vect->data + (i * vect->elem_size);
+		if (unlikely(comp(data_ptr, target) == 0)) {
+			if (out_index)
+				*out_index = i;
+			return MLIB_SUCCESS;
+		}
+	}
 
-        if (out_index)
-                *out_index = vect->size;
-        return MLIB_ERR_NOT_FOUND;
+	if (out_index)
+		*out_index = vect->size;
+	return MLIB_ERR_NOT_FOUND;
 }
 
 mlib_status_t mlib_vector_foreach(mlib_vector_t *vect, mlib_callback_fn cb,
@@ -451,80 +451,80 @@ mlib_status_t mlib_vector_sort(mlib_vector_t *vect, mlib_compar_fn comp)
 
 mlib_status_t mlib_vector_reverse(mlib_vector_t *vect)
 {
-        if (unlikely(!vect))
-                return MLIB_ERR_NULL_PTR;
-        if (unlikely(vect->size < 2))
-                return MLIB_SUCCESS;
+	if (unlikely(!vect))
+		return MLIB_ERR_NULL_PTR;
+	if (unlikely(vect->size < 2))
+		return MLIB_SUCCESS;
 
-        char *left = (char *)vect->data;
-        char *right = (char *)vect->data + ((vect->size - 1) * vect->elem_size);
-        size_t elem_size = vect->elem_size;
+	char *left = (char *)vect->data;
+	char *right = (char *)vect->data + ((vect->size - 1) * vect->elem_size);
+	size_t elem_size = vect->elem_size;
 
-        if (elem_size == 8 && (((uintptr_t)left & 7) == 0)) {
-                while (left < right) {
-                        uint64_t temp = *(uint64_t *)left;
-                        *(uint64_t *)left = *(uint64_t *)right;
-                        *(uint64_t *)right = temp;
-                        left += 8;
-                        right -= 8;
-                }
-                return MLIB_SUCCESS;
-        } else if (elem_size == 4 && (((uintptr_t)left & 3) == 0)) {
-                while (left < right) {
-                        uint32_t temp = *(uint32_t *)left;
-                        *(uint32_t *)left = *(uint32_t *)right;
-                        *(uint32_t *)right = temp;
-                        left += 4;
-                        right -= 4;
-                }
-                return MLIB_SUCCESS;
-        }
+	if (elem_size == 8 && (((uintptr_t)left & 7) == 0)) {
+		while (left < right) {
+			uint64_t temp = *(uint64_t *)left;
+			*(uint64_t *)left = *(uint64_t *)right;
+			*(uint64_t *)right = temp;
+			left += 8;
+			right -= 8;
+		}
+		return MLIB_SUCCESS;
+	} else if (elem_size == 4 && (((uintptr_t)left & 3) == 0)) {
+		while (left < right) {
+			uint32_t temp = *(uint32_t *)left;
+			*(uint32_t *)left = *(uint32_t *)right;
+			*(uint32_t *)right = temp;
+			left += 4;
+			right -= 4;
+		}
+		return MLIB_SUCCESS;
+	}
 
-        char  stack_buf[256];
-        char *aux_buf = stack_buf;
+	char  stack_buf[256];
+	char *aux_buf = stack_buf;
 
-        if (unlikely(elem_size > sizeof(stack_buf))) {
-                aux_buf = malloc(elem_size);
-                if (unlikely(!aux_buf))
-                        return MLIB_ERR_ALLOC;
-        }
+	if (unlikely(elem_size > sizeof(stack_buf))) {
+		aux_buf = malloc(elem_size);
+		if (unlikely(!aux_buf))
+			return MLIB_ERR_ALLOC;
+	}
 
-        while (left < right) {
-                memcpy(aux_buf, left, elem_size);
-                memcpy(left, right, elem_size);
-                memcpy(right, aux_buf, elem_size);
+	while (left < right) {
+		memcpy(aux_buf, left, elem_size);
+		memcpy(left, right, elem_size);
+		memcpy(right, aux_buf, elem_size);
 
-                left += elem_size;
-                right -= elem_size;
-        }
+		left += elem_size;
+		right -= elem_size;
+	}
 
-        if (aux_buf != stack_buf)
-                free(aux_buf);
+	if (aux_buf != stack_buf)
+		free(aux_buf);
 
-        return MLIB_SUCCESS;
+	return MLIB_SUCCESS;
 }
 
 mlib_status_t mlib_vector_swap_remove(mlib_vector_t *vect, size_t index)
 {
-        if (unlikely(!vect))
-                return MLIB_ERR_NULL_PTR;
-        if (unlikely(vect->size == 0))
-                return MLIB_ERR_EMPTY;
-        if (unlikely(index >= vect->size))
-                return MLIB_ERR_OUT_OF_BOUNDS;
+	if (unlikely(!vect))
+		return MLIB_ERR_NULL_PTR;
+	if (unlikely(vect->size == 0))
+		return MLIB_ERR_EMPTY;
+	if (unlikely(index >= vect->size))
+		return MLIB_ERR_OUT_OF_BOUNDS;
 
-        if (index == vect->size - 1)
-                return mlib_vector_pop_back(vect);
+	if (index == vect->size - 1)
+		return mlib_vector_pop_back(vect);
 
-        char *target_slot = (char *)vect->data + (index * vect->elem_size);
-        if (vect->free_fn)
-                vect->free_fn(target_slot);
+	char *target_slot = (char *)vect->data + (index * vect->elem_size);
+	if (vect->free_fn)
+		vect->free_fn(target_slot);
 
-        --vect->size;
-        char *last_slot = (char *)vect->data + (vect->size * vect->elem_size);
-        memmove(target_slot, last_slot, vect->elem_size);
+	--vect->size;
+	char *last_slot = (char *)vect->data + (vect->size * vect->elem_size);
+	memmove(target_slot, last_slot, vect->elem_size);
 
-        return MLIB_SUCCESS;
+	return MLIB_SUCCESS;
 }
 
 #ifdef __cplusplus
